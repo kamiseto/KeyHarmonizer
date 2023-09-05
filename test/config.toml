@@ -1,0 +1,3 @@
+stopkeys = ["q", "ctrl", "shift"]
+macrofilepaths = ["./macro.toml"]
+targetapplication = ["Google Chrome", "Adobe Illustrator"]

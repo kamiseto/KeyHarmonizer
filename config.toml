@@ -1,0 +1,2 @@
+stopkeys = ["q", "ctrl", "shift"]
+macrofilepaths = ["macro.toml"]

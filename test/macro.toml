@@ -1,0 +1,29 @@
+[[applications]]
+	name = "Google Chrome"
+	[[applications.macros]]
+		label = "A"
+		hotkey = ["ctrl","shift","a"]
+		[[applications.macros.commands]]
+			type="shell"
+			value="ls"
+
+	[[applications.macros]]
+		label = "B"
+		hotkey = ["ctrl","shift","b"]
+		commands = [{type="shell",value="ls"}]
+
+[[applications]]
+	name = "Adobe Illustrator"
+	[[applications.macros]]
+		label = "A"
+		hotkey = ["command","shift","z"]
+		[[applications.macros.commands]]
+			type="shell"
+			value="osascript ~/Dropbox/javascript/AI/runrun.scpt"
+
+	[[applications.macros]]
+		label = "B"
+		hotkey = ["command","shift","y"]
+		[[applications.macros.commands]]
+			type="shell"
+			value="ls -l"

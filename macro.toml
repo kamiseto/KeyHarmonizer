@@ -1,0 +1,20 @@
+[[applications]]
+	name = "Adobe Illustrator"
+	[[applications.macros]]
+		label = "A"
+		hotkey = ["command","shift","z"]
+		active = true
+		activated = true
+		[[applications.macros.commands]]
+			type="shell"
+			output="stdout"
+			value="osascript ~/Dropbox/javascript/AI/runrun.scpt"
+	[[applications.macros]]
+		label = "B"
+		hotkey = ["command","shift","y"]
+		active = false
+		activated = false
+		[[applications.macros.commands]]
+			type="shell"
+			output="clipboard"
+			value="ls -la"
