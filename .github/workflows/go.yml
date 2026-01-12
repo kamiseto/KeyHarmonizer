@@ -24,7 +24,7 @@ jobs:
         cache-dependency-path: go.sum
 
     - name: Build
-      run: go build -v -o KeyHarmonizer.exe ./...
+      run: go build -v -o KeyHarmonizer.exe .
 
     - name: Test
       run: go test -v ./...
