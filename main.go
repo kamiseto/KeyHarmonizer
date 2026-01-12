@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -278,14 +279,39 @@ func getActiveApplication() string {
 		result, _ := robotgo.Run("osascript -e 'tell application \"System Events\" to get name of first application process whose frontmost is true'")
 		return *(*string)(unsafe.Pointer(&result))
 	case "windows":
-		result, _ := robotgo.Run("powershell.exe Get-Process | Where-Object {$_.MainWindowTitle -ne \"\"} | Select-Object MainWindowTitle")
-		return *(*string)(unsafe.Pointer(&result))
+		return getActiveAppWindows()
 	case "linux":
 		result, _ := robotgo.Run("xdotool getactivewindow getwindowname")
 		return *(*string)(unsafe.Pointer(&result))
 	default:
 		return ""
 	}
+}
+
+// getActiveAppWindows returns the process name of the foreground window.
+func getActiveAppWindows() string {
+	const psScript = `[void][Add-Type]@'
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+  [DllImport("user32.dll")]
+  public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")]
+  public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+}
+'@;
+$hwnd=[Win32]::GetForegroundWindow();
+$pid=0;
+$null=[Win32]::GetWindowThreadProcessId($hwnd,[ref]$pid);
+(Get-Process -Id $pid).ProcessName`
+
+	cmd := exec.Command("powershell.exe", "-NoLogo", "-NoProfile", "-Command", psScript)
+	out, err := cmd.Output()
+	if err != nil {
+		log.Println("getActiveApplication windows failed:", err)
+		return ""
+	}
+	return strings.TrimSpace(string(out))
 }
 
 func (c *Watcher) run() error {
