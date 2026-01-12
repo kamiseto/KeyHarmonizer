@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"kamiseto/config"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,9 +9,10 @@ import (
 	"strings"
 	"unsafe"
 
+	"kamiseto/config"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/getlantern/systray"
-	"github.com/getlantern/systray/example/icon"
 	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
 )
@@ -49,20 +49,23 @@ func main() {
 	log.Println(exe_folder)
 	os.Chdir(exe_folder)
 
-	Conf = config.ReadConfig("config.toml")
+	configfile := home + "/" + "config.toml"
+	Conf = config.ReadConfig(configfile)
 	SubMenu = make(map[string]*systray.MenuItem)
 	watcher := &Watcher{filepath: Conf.Macrofilepaths[0]}
 	go watcher.run()
-	go conf()
 	menustart()
 }
 
 func menustart() {
 	onExit := func() {
-		robotgo.EventEnd()
+		hook.End()
 	}
+
 	onReady := func() {
-		systray.SetTemplateIcon(icon.Data, icon.Data)
+		log.Println("systray ready: building menu")
+		// Keep text-only to avoid invisible icon issues on some themes
+		// systray.SetIcon(icon.Data)
 		systray.SetTitle("HotKeys")
 		systray.SetTooltip("HotKey Launcher")
 		mQuitOrig := systray.AddMenuItem("Quit", "Quit the whole app")
@@ -72,6 +75,7 @@ func menustart() {
 		SubMenu["SubMenuTop"] = systray.AddMenuItem("SubMenuTop", "SubMenu Test (top)")
 		mStartEvent.Disable()
 		mStartEvent.Hide()
+		go conf() // start after SubMenuTop is initialized
 		for {
 			select {
 			case <-mQuitOrig.ClickedCh:
@@ -88,7 +92,7 @@ func menustart() {
 					SubMenu[submenu].Disable()
 					SubMenu[submenu].Hide()
 				}
-				robotgo.EventEnd()
+				hook.End()
 			case <-mStartEvent.ClickedCh:
 				log.Println("Start hook")
 				mStartEvent.Disable()
@@ -107,6 +111,11 @@ func conf() {
 	// config読み込み
 	ApplicationsConfig = config.ReadApplicationConfig(Conf.Macrofilepaths[0])
 	Applications = make(map[string][]config.Macro)
+	subMenuTop := SubMenu["SubMenuTop"]
+	if subMenuTop == nil {
+		log.Println("SubMenuTop is not ready; skip conf")
+		return
+	}
 	for _, app := range ApplicationsConfig.Applications {
 		Applications[app.Name] = app.Macros
 	}
@@ -117,7 +126,7 @@ func conf() {
 		if checkApplication(name) {
 			log.Println(name, "の起動を確認しました。")
 			go func() {
-				appmenu := SubMenu["SubMenuTop"].AddSubMenuItem(name, "起動中")
+				appmenu := subMenuTop.AddSubMenuItem(name, "起動中")
 				go registerMacro(name, macros, appmenu)
 			}()
 		} else {
@@ -128,8 +137,8 @@ func conf() {
 		}
 	}
 
-	EventStatus = robotgo.EventStart()
-	<-robotgo.EventProcess(EventStatus)
+	EventStatus = hook.Start()
+	<-hook.Process(EventStatus)
 }
 
 // アプリケーションの起動を確認する
@@ -141,7 +150,7 @@ func checkApplication(name string) bool {
 
 	ids, _ := robotgo.FindIds(name)
 	if len(ids) > 0 {
-		PidList[name] = ids[0]
+		PidList[name] = int32(ids[0]) // Convert ids[0] to int32
 		return true
 	} else {
 		return false
@@ -154,19 +163,28 @@ func registerMacro(name string, macros []config.Macro, appmenu *systray.MenuItem
 	for _, macro := range macros {
 		log.Println(macro.Label, macro.Hotkey, "の登録を行いました。")
 		appmenu.AddSubMenuItem(macro.Label+"  "+strings.Join(macro.Hotkey, "+"), "")
-		robotgo.EventHook(hook.KeyDown, macro.Hotkey, hookFunc(name, macro))
+		hook.Register(hook.KeyDown, macro.Hotkey, hookFunc(name, macro))
 	}
 }
 
 // hook関数をジェネレート
 func hookFunc(targetApplication string, macro config.Macro) func(e hook.Event) {
 	hookfunc := func(e hook.Event) {
-		ids := getIDs(targetApplication)
+		//実際に押されたキーをhook.Eventから取得
+		ekey := e.Rawcode
+		log.Println("ekey:", ekey)
+
+		//ids := getIDs(targetApplication)
 		//
 		activeapp := getActiveApplication()
 		//activeappの不要な改行を削除
 		activeapp = strings.Replace(activeapp, "\n", "", -1)
 		//
+		log.Println("event:", e, "activeapp:", activeapp, "targetApplication:", targetApplication)
+		log.Println("macro:", macro.Label, "hotkey:", macro.Hotkey)
+		//実際に押されたキーとマクロのキーが一致しているか確認
+		log.Println("e.Keycode:", e.Keycode, "macro.Hotkey:", macro.Hotkey)
+
 		if macro.Activated {
 			if activeapp != targetApplication {
 				log.Println("前面アプリケーションの場合のみ実行: ", activeapp, "  ", targetApplication)
@@ -174,11 +192,13 @@ func hookFunc(targetApplication string, macro config.Macro) func(e hook.Event) {
 			}
 		} else {
 			if macro.Active {
-				err := robotgo.ActivePID(ids)
-				if err != nil {
-					log.Println("error is: ", err)
-					return
-				}
+				/*
+					err := robotgo.ActivePID(int(ids))
+					if err != nil {
+						log.Println("error is: ", err)
+						return
+					}
+				*/
 			}
 		}
 		EventExec(targetApplication, macro.Commands, macro.Label)
@@ -233,10 +253,10 @@ func getIDs(target string) int32 {
 	//PidList has target?
 	ids, ok := PidList[target]
 	if ok {
-		return ids
+		return int32(ids)
 	} else {
 		ids, _ := robotgo.FindIds(target)
-		return ids[0]
+		return int32(ids[0])
 	}
 }
 
@@ -277,17 +297,15 @@ func (c *Watcher) run() error {
 				} else {
 					log.Println("Stop hook")
 					log.Printf("設定ファイルをリロードします。%s\n", event.Name)
-					robotgo.EventEnd()
+					hook.End()
 					go conf()
 				}
 			}
 		case err := <-watcher.Errors:
 			log.Println("error:", err)
+			return err
 		}
 	}
-
-	log.Printf("設定ファイルの監視を終了しました。%s\n", c.filepath)
-	return nil
 }
 
 func setClipboard(text string) {

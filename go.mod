@@ -1,18 +1,20 @@
 module kamiseto
 
-go 1.21
+go 1.24.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getlantern/systray v1.2.2
-	github.com/go-vgo/robotgo v0.110.0
+	github.com/go-vgo/robotgo v1.0.0
 	github.com/robotn/gohook v0.41.0
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 )
 
 require (
-	github.com/gen2brain/shm v0.0.0-20230802011745-f2460f5984f7 // indirect
+	github.com/dblohm7/wingoes v0.0.0-20250822163801-6d8e6105c62d // indirect
+	github.com/ebitengine/purego v0.9.1 // indirect
+	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
 	github.com/getlantern/errors v0.0.0-20190325191628-abdb3e3e36f7 // indirect
 	github.com/getlantern/golog v0.0.0-20190830074920-4ef2e798c2d7 // indirect
@@ -21,24 +23,25 @@ require (
 	github.com/getlantern/ops v0.0.0-20190325191751-d70cb0d6f85f // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/jezek/xgb v1.1.0 // indirect
-	github.com/kbinani/screenshot v0.0.0-20230812210009-b87d31814237 // indirect
-	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
-	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
-	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
+	github.com/godbus/dbus/v5 v5.2.0 // indirect
+	github.com/jezek/xgb v1.2.0 // indirect
+	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
+	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
-	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
-	github.com/robotn/xgb v0.0.0-20190912153532-2cb92d044934 // indirect
-	github.com/robotn/xgbutil v0.0.0-20190912154524-c861d6f87770 // indirect
-	github.com/shirou/gopsutil/v3 v3.23.8 // indirect
-	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/tklauser/go-sysconf v0.3.12 // indirect
-	github.com/tklauser/numcpus v0.6.1 // indirect
-	github.com/vcaesar/gops v0.30.2 // indirect
-	github.com/vcaesar/imgo v0.40.0 // indirect
+	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/robotn/xgb v0.10.0 // indirect
+	github.com/robotn/xgbutil v0.10.0 // indirect
+	github.com/shirou/gopsutil/v4 v4.25.10 // indirect
+	github.com/tailscale/win v0.0.0-20250627215312-f4da2b8ee071 // indirect
+	github.com/tklauser/go-sysconf v0.3.16 // indirect
+	github.com/tklauser/numcpus v0.11.0 // indirect
+	github.com/vcaesar/gops v0.41.0 // indirect
+	github.com/vcaesar/imgo v0.41.0 // indirect
 	github.com/vcaesar/keycode v0.10.1 // indirect
-	github.com/vcaesar/tt v0.20.0 // indirect
-	github.com/yusufpapurcu/wmi v1.2.3 // indirect
-	golang.org/x/image v0.12.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	github.com/vcaesar/screenshot v0.11.1 // indirect
+	github.com/vcaesar/tt v0.20.1 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39 // indirect
+	golang.org/x/image v0.33.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 )
