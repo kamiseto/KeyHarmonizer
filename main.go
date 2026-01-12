@@ -48,8 +48,20 @@ func main() {
 	exe_folder := filepath.Dir(exe)
 	log.Println(exe_folder)
 	os.Chdir(exe_folder)
+	if home == "" {
+		if h, err := os.UserHomeDir(); err == nil {
+			home = h
+		} else {
+			home = exe_folder
+			log.Println("HOME not set; fallback to exe dir", home)
+		}
+	}
 
-	configfile := home + "/" + "config.toml"
+	localConfig := filepath.Join(exe_folder, "config.toml")
+	configfile := localConfig
+	if _, err := os.Stat(localConfig); os.IsNotExist(err) {
+		configfile = filepath.Join(home, "config.toml")
+	}
 	Conf = config.ReadConfig(configfile)
 	SubMenu = make(map[string]*systray.MenuItem)
 	watcher := &Watcher{filepath: Conf.Macrofilepaths[0]}
