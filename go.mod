@@ -1,6 +1,6 @@
 module kamiseto
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2
