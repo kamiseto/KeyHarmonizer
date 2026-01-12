@@ -1,12 +1,7 @@
 package test
 
-import (
-	"fmt"
-	"kamiseto/watch"
-	"testing"
-)
+import "testing"
 
 func TestWatch(t *testing.T) {
-	fmt.Println("TestWatch")
-	//watch.Watcher("./macro.toml")
+	t.Skip("watch tests not implemented")
 }
