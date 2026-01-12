@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 )
@@ -50,8 +51,13 @@ type Command struct {
 	Value  string `toml:"value"`
 }
 
-// 設定ファイルの読み込み
+// ファイル読み込み (config.toml)
+// ファイルがなかったら作成 (config.toml)
+// ファイルがあったら読み込み (config.toml)
+
 func ReadConfig(f string) Config {
+	home := resolveHome()
+	// ファイルがなかったら作成 (config.toml)
 	if _, err := os.Stat(f); os.IsNotExist(err) {
 		// ファイルがなかったら作成 (config.toml)
 		log.Println("config.toml is not exist")
@@ -63,7 +69,8 @@ func ReadConfig(f string) Config {
 		defer file.Close()
 		// ファイルに書き込む
 		fmt.Fprintln(file, "stopkeys = [\"q\", \"ctrl\", \"shift\"]")
-		fmt.Fprintln(file, "macrofilepaths = [\"macro.toml\"]")
+		fmt.Fprintln(file, "macrofilepaths = [\""+filepath.Join(home, "macro.toml")+"\"]")
+		log.Println("create config.toml")
 	}
 
 	// ファイルがあったら読み込み (config.toml)
@@ -74,6 +81,17 @@ func ReadConfig(f string) Config {
 	return config
 }
 
+// resolveHome returns a usable home directory path on all platforms.
+func resolveHome() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	if h, err := os.UserHomeDir(); err == nil && h != "" {
+		return h
+	}
+	return "."
+}
+
 func ReadApplicationConfig(f string) Applications {
 	// ファイルがなかったら作成 (config.toml)
 	if _, err := os.Stat(f); os.IsNotExist(err) {
@@ -81,6 +99,7 @@ func ReadApplicationConfig(f string) Applications {
 		log.Println(f, "is not exist")
 		// ファイル作成
 		file, err := os.Create(f)
+		log.Println("create", f)
 		if err != nil {
 			log.Fatal(err)
 		}
